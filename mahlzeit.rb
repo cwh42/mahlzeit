@@ -6,7 +6,7 @@ require 'json'
 require 'optparse'
 require './lib/helpers'
 
-headers = %w[Angebot Montag Dienstag Mittwoch Donnerstag Freitag]
+@headers = %w[Angebot Montag Dienstag Mittwoch Donnerstag Freitag]
 @ignore = %w[enthält Beilagentausch Informationen Änderungen]
 
 options = {}
@@ -19,64 +19,57 @@ OptionParser.new do |parser|
   end
 end.parse!
 
-filename = ARGV[0]
-if filename.nil?
-  puts "Give a PDF to parse as a parameter!"
+filenames = ARGV.select {|param| param.downcase.include?('.pdf') }
+
+if filenames.empty?
+  puts "Give one or more PDF-files to parse as a parameter!"
   exit
 end
 
 output = {}
 
-PDF::Reader.open(filename) do |reader|
-  reader.pages.each do |page|
-    week = {}
-    cols = []
-    category = ''
-    date = nil
-    page.text.split(/\n+/).each do |line|
-      # detect the line with column headers
-      if line.start_with?(headers.first)
-        # find the indices of each header
-        headers.each_index do |i|
-          start = line.index(headers[i])
-          # set the column width of the last header
-          if i > 0
-            len = start - cols[i-1][:start]
-            cols[i-1][:len] = len
-          end
-          # store the column position (start) and width (len); use a big number (1000)
-          # as a default for len to make sure the very last column just catches the rest of the line
-          cols[i] = {name: headers[i], start: start, len: 1000}
-        end
-      elsif ignore? line # ignore lines containing words form the @ignore list
-        next
-      elsif line.match(/\d+\.\d+\.\d{4}/) {|matchdata| date = Date.parse(matchdata.match(0)) }
+filenames.each do |filename|
+  PDF::Reader.open(filename) do |reader|
+    reader.pages.each do |page|
+      week = {}
+      cols = []
+      category = ''
+      date = nil
+      page.text.split(/\n+/).each do |line|
+        # ignore lines containing words form the @ignore list
+        next if ignore? line
         # line contains a date formatted like '31.12.2022'; use it as a hash-key later
-      elsif cols.any?
-        # we already got the headers and the column position/with. So let's parse!
-        cols.each do |col|
-          snip = line[col[:start], col[:len]]&.strip
-          next if snip.nil? || snip.empty?
+        next if date.nil? && line.match(/\d+\.\d+\.\d{4}/) {|matchdata| date = Date.parse(matchdata.match(0)) }
 
-          if col[:name] == 'Angebot' # We are in the first column; It contains the category of the dish
-            category = snip
-          elsif category != 'Salat' # Ignore any salad (too healthy)
-            if week[col[:name]].nil? # new day for that week?
-              week[col[:name]] = {category => snip}
-            else
-              if week[col[:name]][category].nil? # new category for that day?
-                week[col[:name]][category] = snip
-              else # day and category are already there; just append the current snippet
-                week[col[:name]][category] << ' ' << snip
+        if cols.any? # we already got the headers and the column position/with. So let's parse!
+          cols.each do |col|
+            snip = line[col[:start], col[:len]]&.strip
+            next if snip.nil? || snip.empty?
+
+            if col[:name] == @headers.first # We are in the first column; It contains the category of the dish
+              category = snip
+            elsif category != 'Salat' # Ignore any salad (too healthy)
+              if week[col[:name]].nil? # new day for that week?
+                week[col[:name]] = {category => snip}
+              else
+                if week[col[:name]][category].nil? # new category for that day?
+                  week[col[:name]][category] = snip
+                else # day and category are already there; just append the current snippet
+                  week[col[:name]][category] << ' ' << snip
+                end
               end
             end
+            p [col[:name], category, snip] if options[:debug]
           end
-          p [col[:name], category, snip] if options[:debug]
+        elsif line.start_with?(@headers.first) # detect the line with column headers
+          cols = find_columns(line)
+          p cols if options[:debug]
         end
       end
+      # add the week to the output as a hash with ISO 8601 week date, like "2022W40", as a key
+      output[date.strftime('%GW%V')] = week
+      puts "-- new week --#{'-' * 60}" if options[:debug]
     end
-    # add the week to the output as a hash with ISO 8601 week date, like "2022W40", as a key
-    output[date.strftime('%GW%V')] = week
   end
-  puts JSON.pretty_generate(output)
 end
+puts JSON.pretty_generate(output)
