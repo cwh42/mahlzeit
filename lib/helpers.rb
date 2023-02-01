@@ -7,21 +7,22 @@ def ignore? (string)
   @ignore.any? { |word| string.include?(word) }
 end
 
-# find the column start and width for each header
-def find_columns (line)
-  cols = []
-  @headers.each_index do |i|
-    start = line.index(@headers[i])
-    # set the column width of the last header
-    if i > 0
-      len = start - cols[i-1][:start]
-      cols[i-1][:len] = len
-    end
-    # store the column position (start) and width (len); use a big number (1000)
-    # as a default for len to make sure the very last column just catches the rest of the line
-    cols[i] = {name: @headers[i], start: start, len: 1000}
-  end
-  cols
+# create a regexp to match the table headers
+def header_regexp
+  pattern = @headers.map{ |header| "(?<#{header}>#{header}\\s*)" }.join
+  Regexp.new pattern
+end
+
+# create a regexp to split up the lines by fixed-width columns
+def line_regexp (line)
+  col_widths = line.match(@header_regexp).captures.map { |column| column.length }
+  pattern = col_widths.map{|col| "(.{,#{col}})"}.join
+  Regexp.new pattern
+end
+
+# parse a line of the table body using the given regexp
+def parse (line, regexp)
+  line.match(regexp).captures.map { |cols| cols.strip }
 end
 
 # write RSS feed xml and metadata

@@ -30,6 +30,9 @@ if filenames.empty?
   exit
 end
 
+@header_regexp = header_regexp
+p @header_regexp if options[:debug]
+
 output = {}
 
 filenames.each do |filename|
@@ -37,6 +40,7 @@ filenames.each do |filename|
     reader.pages.each do |page|
       week = {}
       cols = []
+      regexp = nil
       category = ''
       date = nil
       page.text.split(/\n+/).each do |line|
@@ -45,29 +49,35 @@ filenames.each do |filename|
         # line contains a date formatted like '31.12.2022'; use it as a hash-key later
         next if date.nil? && line.match(/\d+\.\d+\.\d{4}/) {|matchdata| date = Date.parse(matchdata.match(0)) }
 
-        if cols.any? # we already got the headers and the column position/width. So let's parse!
-          cols.each do |col| # Go through the current line column by column
-            snip = line[col[:start], col[:len]]&.strip
-            next if snip.nil? || snip.empty?
+        if regexp.nil?
+          if line.start_with?(@headers.first)
+            regexp = line_regexp line
+            p regexp if options[:debug]
+          end
+          next
+        end
 
-            if col[:name] == @headers.first # We are in the first column; It contains the category of the dish
-              category = snip
-            elsif category != 'Salat' # Ignore any salad (too healthy)
-              if week[col[:name]].nil? # new day for that week?
-                week[col[:name]] = {category => snip}
-              else
-                if week[col[:name]][category].nil? # new category for that day?
-                  week[col[:name]][category] = snip
-                else # day and category are already there; just append the current snippet
-                  week[col[:name]][category] << ' ' << snip
-                end
+        columns = parse line, regexp # parse the line; get an array
+        p columns if options[:debug]
+
+        columns.each_index do |i|
+          wday = @headers[i]
+          snip = columns[i]
+          next if snip.empty?
+
+          if i == 0 # first column contains the category of the dish
+            category = snip
+          elsif category != 'Salat' # Ignore any salad (too healthy)
+            if week[wday].nil? # new day for that week?
+              week[wday] = {category => snip}
+            else
+              if week[wday][category].nil? # new category for that day?
+                week[wday][category] = snip
+              else # day and category are already there; just append the current snippet
+                week[wday][category] += " #{snip}"
               end
             end
-            p [col[:name], category, snip] if options[:debug]
           end
-        elsif line.start_with?(@headers.first) # detect the line with column headers
-          cols = find_columns(line)
-          p cols if options[:debug]
         end
       end
       # add the week to the output as a hash with ISO 8601 week date, like "2022W40", as a key
