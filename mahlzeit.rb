@@ -17,6 +17,10 @@ OptionParser.new do |parser|
   parser.on("-d", "--debug", "Debug output") do |d|
     options[:debug] = d
   end
+
+  parser.on("-r", "--rss", "Output as RSS") do |r|
+    options[:rss] = r
+  end
 end.parse!
 
 filenames = ARGV.select {|param| param.downcase.include?('.pdf') }
@@ -41,8 +45,8 @@ filenames.each do |filename|
         # line contains a date formatted like '31.12.2022'; use it as a hash-key later
         next if date.nil? && line.match(/\d+\.\d+\.\d{4}/) {|matchdata| date = Date.parse(matchdata.match(0)) }
 
-        if cols.any? # we already got the headers and the column position/with. So let's parse!
-          cols.each do |col|
+        if cols.any? # we already got the headers and the column position/width. So let's parse!
+          cols.each do |col| # Go through the current line column by column
             snip = line[col[:start], col[:len]]&.strip
             next if snip.nil? || snip.empty?
 
@@ -72,4 +76,9 @@ filenames.each do |filename|
     end
   end
 end
-puts JSON.pretty_generate(output)
+
+if options[:rss]
+  write_rss output
+else
+  puts JSON.pretty_generate(output)
+end

@@ -1,11 +1,13 @@
 # Helpers for Mahlzeit!
 
+require 'rss_creator'
+
 # check if string contains any of the words from the @ignore-list
 def ignore? (string)
   @ignore.any? { |word| string.include?(word) }
 end
 
-# find the column start and withd for each header
+# find the column start and width for each header
 def find_columns (line)
   cols = []
   @headers.each_index do |i|
@@ -20,4 +22,23 @@ def find_columns (line)
     cols[i] = {name: @headers[i], start: start, len: 1000}
   end
   cols
+end
+
+# write RSS feed xml and metadata
+def write_rss (data)
+  rss = RSScreator.new 'mahlzeit.rss'
+  rss.title = 'Mahlzeit!'
+  rss.desc = 'Nuremberg Franken Campus\' Canteen Menu Feed'
+
+  data.each do |date, week|
+    week.each do |day, menu|
+      desc = ''
+      menu.each do |cat, dish|
+        desc << "<i>#{cat}</i>: #{dish}</br>"
+      end
+      item = { title: "#{date}, #{day}", link: '–', description: desc }
+      rss.add item
+    end
+  end
+  rss.save
 end
