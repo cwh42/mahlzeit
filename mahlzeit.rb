@@ -7,7 +7,7 @@ require 'optparse'
 require './lib/helpers'
 
 @headers = %w[Angebot Montag Dienstag Mittwoch Donnerstag Freitag]
-@ignore = %w[enthält Beilagentausch Informationen Änderungen]
+@ignore = %w[enthält 'Stellen Sie sich' 'und Toppings zusammen' Beilagentausch Informationen Änderungen]
 
 options = {}
 
@@ -43,7 +43,10 @@ filenames.each do |filename|
       regexp = nil
       category = ''
       date = nil
+      header_length = 0
       page.text.split(/\n+/).each do |line|
+        p line if options[:debug]
+
         # ignore lines containing words form the @ignore list
         next if ignore? line
         # line contains a date formatted like '31.12.2022'; use it as a hash-key later
@@ -51,6 +54,7 @@ filenames.each do |filename|
 
         if regexp.nil?
           if line.start_with?(@headers.first)
+            header_length = line.length
             regexp = line_regexp line
             p regexp if options[:debug]
           end
@@ -82,7 +86,7 @@ filenames.each do |filename|
       end
       # add the week to the output as a hash with ISO 8601 week date, like "2022W40", as a key
       output[date.strftime('%GW%V')] = week
-      puts "-- new week --#{'-' * 60}" if options[:debug]
+      STDERR.puts "-- new week --#{'-' * 60}" if options[:debug]
     end
   end
 end
