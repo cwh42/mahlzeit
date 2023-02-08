@@ -1,0 +1,29 @@
+# Some settings
+DATE=`date +"%Y-%m-%d"`
+LOCAL=${HOME}/.procmail
+MAILDIR=${HOME}/Mailincoming
+
+# Some folders
+KILL=/dev/null
+INBOX=inbox/
+
+DEFAULT=$INBOX
+
+#
+# Locking
+#
+#LOCKEXT=.lock
+
+#
+# Logging
+#
+LOGABSTRACT=no
+VERBOSE=no
+LOGFILE=${LOCAL}/log/procmail-$DATE.log
+
+:0 c
+| $HOME/bin/pdfsaver
+
+# The rest goes to the inbox
+:0:
+$INBOX

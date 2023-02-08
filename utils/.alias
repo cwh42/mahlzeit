@@ -1,0 +1,1 @@
+alias mahlzeit='curl -s http://w3.suse.de/~cwh/mahlzeit/mahlzeit.json | jq -r ".[\"$(date +%GW%V)\"][\"$(LANG=de_DE date +%A)\"][]"'

@@ -1,0 +1,10 @@
+#!/bin/bash
+
+shopt -s nocaseglob
+TMPDIR=`mktemp -d`
+
+$HOME/bin/ripmime -i - -d $TMPDIR
+
+mv $TMPDIR/*.pdf $HOME/Export/mahlzeit/
+
+rm -r $TMPDIR
