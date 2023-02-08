@@ -1,15 +1,21 @@
 #!/bin/sh
 API_URL="https://users.suse.com/~cwh/mahlzeit/mahlzeit.json"
+
+if [ $# -eq 0 ]; then # No arguments supplied
+    MENU_OFFSET=1
+else
+    case "$1" in
+    "tomorrow") MENU_OFFSET=0 ;;
+    "yesterday") MENU_OFFSET=2 ;;
+    "today") MENU_OFFSET=1 ;;
+    *)
+        echo "Unknown argument. Try no argument, 'tomorrow', 'yesterday' or 'today'"
+        exit
+        ;;
+    esac
+fi
+
 MENU_JSON=$(curl -s $API_URL)
-
-case "$1" in
-"tomorrow") MENU_OFFSET=0 ;;
-"yesterday") MENU_OFFSET=2 ;;
-"today") MENU_OFFSET=1 ;;
-*) echo "Unknown argument. Try tomorrow, yesterday, today or no argument"; exit
-esac
-
-export MENU_JSON && export MENU_OFFSET
 
 function impl_jq() {
     if command -v jq &>/dev/null; then
@@ -19,6 +25,8 @@ function impl_jq() {
         exit
     fi
 }
+
+export MENU_JSON && export MENU_OFFSET # to access in python via os.environ[]
 
 function impl_python() {
     if command -v python3 &>/dev/null; then
@@ -38,6 +46,7 @@ EOF
 impl_jq
 impl_python
 
-echo "You have neither jq nor Python3 installed. Falling back to printing the whole JSON. Good luck."; sleep 2
-echo $MENU_JSON;
+echo "You have neither jq nor Python3 installed. Falling back to printing the whole JSON. Good luck."
+sleep 2
+echo $MENU_JSON
 echo "It's recommended to install either jq or Python3 and then rerun the command."
