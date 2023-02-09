@@ -34,9 +34,10 @@ function impl_python() {
         python3 - <<EOF
 
 import sys,json,locale as lc,os,datetime as dt
-now=dt.datetime.now() - dt.timedelta(days=int(os.environ["MENU_OFFSET"])-1); cw_year=f"{now.year}W{str(now.isocalendar().week).zfill(2)}"
+now=dt.datetime.now() - dt.timedelta(days=int(os.environ["MENU_OFFSET"])-1); 
+cw_year="%sW%s" % (now.year, str(now.isocalendar()[1]).zfill(2))
 lc.setlocale(lc.LC_ALL,'de_DE'); menu_json=json.loads(os.environ["MENU_JSON"])[cw_year][now.strftime('%A')]
-for key in menu_json:print(f"{key}: {menu_json[key]}")
+for key in menu_json:print("%s: %s" % (key, menu_json[key]))
 
 EOF
         exit
