@@ -1,3 +1,8 @@
+# Web Version
+
+- [Internal](http://w3.suse.de/~cwh/mahlzeit/)
+- [External](https://users.suse.com/~cwh/mahlzeit/)
+
 # RSS Feed
 
 - [Internal](http://w3.suse.de/~cwh/mahlzeit/mahlzeit.rss)

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="alternate" type="application/rss+xml" title="RSS" href="mahlzeit.rss" />
+  <title>Mahlzeit!</title>
+</head>
+<body>
+  <h1>Mahlzeit!</h1>
+
+  <div id="app"></div>
+
+  <script type="text/x-template" id="menu">
+    <h2 class="kalender-woche"></h2>
+    <h3 class="kalender-tag"></h3>
+    <div class="mahlzeit-essen"></div>
+  </script>
+
+  <script type="text/x-template" id="menu-item">
+    <p class="mahlzeit-essen-item"></p>
+  </script>
+
+  <script>
+  const days = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag'];
+  const mainViewEl = document.querySelector('#menu')
+  const itemViewEl = document.querySelector('#menu-item')
+  var appViewEl = document.querySelector('#app')
+  var today = new Date();
+  var weekday = days[today.getDay()];
+
+  function appendDataOLD(data) {
+    var mainContainer = document.getElementById("myData");
+    //for (var i = 0; i < data.length; i++) {
+    var h2 = document.createElement("h2");
+    var h3 = document.createElement("h3");
+    var div = document.createElement("div");
+
+    var week = getWeekNumber(today);
+    var weekString = week[0].toString() + 'W' + week[1].toString().padStart(2, "0");
+
+    h2.innerHTML = weekString;
+    h3.innerHTML = weekday;
+
+    for (const [key, value] of Object.entries(data[weekString][weekday])) {
+      var p = document.createElement("p");
+      p.innerHTML = `${key}: ${value}`;
+      div.appendChild(p);
+    }
+    mainContainer.appendChild(h2);
+    mainContainer.appendChild(h3);
+    mainContainer.appendChild(div);
+    //}
+  }
+
+  function appendData(data) {
+    var week = getWeekNumber(today);
+    var weekString = week[0].toString() + 'W' + week[1].toString().padStart(2, "0");
+
+    // render the main view
+
+    appViewEl.innerHTML = mainViewEl.innerHTML
+
+    appViewEl.querySelector('.kalender-woche').innerText = weekString
+    appViewEl.querySelector('.kalender-tag').innerText = weekday
+
+    let menu = data[weekString][weekday];
+    let menuContainerEl = appViewEl.querySelector('.mahlzeit-essen')
+
+    for (const [key, value] of Object.entries(menu)) {
+      menuContainerEl.innerHTML += itemViewEl.innerHTML
+      let last = Array.from(menuContainerEl.querySelectorAll('.mahlzeit-essen-item')).pop();
+      last.innerText = `${key}: ${value}`;
+    }
+
+  }
+
+  function getWeekNumber(d) {
+    // Copy date so don't modify original
+    d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    // Set to nearest Thursday: current date + 4 - current day number
+    // Make Sunday's day number 7
+    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
+    // Get first day of year
+    var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
+    // Calculate full weeks to nearest Thursday
+    var weekNo = Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7);
+    // Return array of year and week number
+    return [d.getUTCFullYear(), weekNo];
+  }
+
+  async function main(){
+    let today = new Date();
+    let weekday = days[today.getDay()];
+
+    var tomorrow = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() + 1,
+      0, 0, 0
+    );
+
+    var untilTomorrow = tomorrow.getTime() - today.getTime();
+    setTimeout('main()', untilTomorrow);
+
+    try {
+      let response = await fetch('mahlzeit.json')
+      appendData(await response.json())
+    } catch (err) {
+      console.log('error: ' + err);
+    }
+    console.log("done")
+  }
+
+  main();
+  </script>
+</body>
+</html>
