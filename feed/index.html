@@ -1,118 +1,49 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="alternate" type="application/rss+xml" title="RSS" href="mahlzeit.rss" />
-  <title>Mahlzeit!</title>
-</head>
-<body>
-  <h1>Mahlzeit!</h1>
-
-  <div id="app"></div>
-
-  <script type="text/x-template" id="menu">
-    <h2 class="kalender-woche"></h2>
-    <h3 class="kalender-tag"></h3>
-    <div class="mahlzeit-essen"></div>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Mahlzeit!</title>
+    <link href="assets/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD">
+  </head>
+  <body>
+  
+  <main>
+  <div class="px-4 py-5 my-5 text-center">
+    <div class="d-block mx-auto mb-4"><img src="assets/1F35D.svg" height="130em;" title="designed by OpenMoji – the open-source emoji and icon project. License: CC BY-SA 4.0"></div>
+    <h1 id="headline" class="display-5 fw-bold">Mahlzeit!</h1>
+    <div id="today" class="col-lg-6 mx-auto">
+      <p class="lead mb-4 mz-dish">😭</p>
+    </div>
+  </div>
+  </main>
+  <script src="assets/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"></script>
+  <script src="assets/xdate.min.js"></script>
+  <script src="assets/jquery-3.6.3.min.js"></script>
+  <script type="text/javascript">
+    const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag'];
+    var today = new XDate().addDays(0);
+    var weekday = dayNames[today.getDay()];
+    var week = today.getFullYear() + 'W' + today.getWeek() ;
+    var weekString = today.toString("yyyy'W'ww");
+    
+    $(document).ready(function(){
+        $( "#headline").text(weekday);
+        $.getJSON( "mahlzeit.json", function( data ) {
+            var p = $( "#today .mz-dish" );
+            
+            if ( typeof data[weekString][weekday] !== 'undefined' ) {
+                p.remove();
+            }
+            
+            $.each( data[weekString][weekday], function( key, val ) {
+                p.clone().text(val).appendTo("#today");
+            });
+        }).fail(function(){
+            $( "#headline").text("Oops! Could not load the menu!");
+        });
+    });
   </script>
-
-  <script type="text/x-template" id="menu-item">
-    <p class="mahlzeit-essen-item"></p>
-  </script>
-
-  <script>
-  const days = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag'];
-  const mainViewEl = document.querySelector('#menu')
-  const itemViewEl = document.querySelector('#menu-item')
-  var appViewEl = document.querySelector('#app')
-  var today = new Date();
-  var weekday = days[today.getDay()];
-
-  function appendDataOLD(data) {
-    var mainContainer = document.getElementById("myData");
-    //for (var i = 0; i < data.length; i++) {
-    var h2 = document.createElement("h2");
-    var h3 = document.createElement("h3");
-    var div = document.createElement("div");
-
-    var week = getWeekNumber(today);
-    var weekString = week[0].toString() + 'W' + week[1].toString().padStart(2, "0");
-
-    h2.innerHTML = weekString;
-    h3.innerHTML = weekday;
-
-    for (const [key, value] of Object.entries(data[weekString][weekday])) {
-      var p = document.createElement("p");
-      p.innerHTML = `${key}: ${value}`;
-      div.appendChild(p);
-    }
-    mainContainer.appendChild(h2);
-    mainContainer.appendChild(h3);
-    mainContainer.appendChild(div);
-    //}
-  }
-
-  function appendData(data) {
-    var week = getWeekNumber(today);
-    var weekString = week[0].toString() + 'W' + week[1].toString().padStart(2, "0");
-
-    // render the main view
-
-    appViewEl.innerHTML = mainViewEl.innerHTML
-
-    appViewEl.querySelector('.kalender-woche').innerText = weekString
-    appViewEl.querySelector('.kalender-tag').innerText = weekday
-
-    let menu = data[weekString][weekday];
-    let menuContainerEl = appViewEl.querySelector('.mahlzeit-essen')
-
-    for (const [key, value] of Object.entries(menu)) {
-      menuContainerEl.innerHTML += itemViewEl.innerHTML
-      let last = Array.from(menuContainerEl.querySelectorAll('.mahlzeit-essen-item')).pop();
-      last.innerText = `${key}: ${value}`;
-    }
-
-  }
-
-  function getWeekNumber(d) {
-    // Copy date so don't modify original
-    d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
-    // Set to nearest Thursday: current date + 4 - current day number
-    // Make Sunday's day number 7
-    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7));
-    // Get first day of year
-    var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1));
-    // Calculate full weeks to nearest Thursday
-    var weekNo = Math.ceil(( ( (d - yearStart) / 86400000) + 1)/7);
-    // Return array of year and week number
-    return [d.getUTCFullYear(), weekNo];
-  }
-
-  async function main(){
-    let today = new Date();
-    let weekday = days[today.getDay()];
-
-    var tomorrow = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate() + 1,
-      0, 0, 0
-    );
-
-    var untilTomorrow = tomorrow.getTime() - today.getTime();
-    setTimeout('main()', untilTomorrow);
-
-    try {
-      let response = await fetch('mahlzeit.json')
-      appendData(await response.json())
-    } catch (err) {
-      console.log('error: ' + err);
-    }
-    console.log("done")
-  }
-
-  main();
-  </script>
-</body>
+  </body>
 </html>
+
