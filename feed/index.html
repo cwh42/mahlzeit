@@ -15,6 +15,9 @@
     <div id="today" class="col-lg-6 mx-auto">
       <p class="lead mb-4 mz-dish">😭</p>
     </div>
+    <div class="embed-responsive embed-responsive-16by9 mz-currywurst" style="display: none;">
+      <iframe src="https://www.youtube.com/embed/xxz4a5CDPkw?controls=0" title="YouTube video player" allowfullscreen></iframe>
+    </div>
   </div>
   </main>
   <script src="assets/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"></script>
@@ -25,7 +28,8 @@
     var today = new XDate().addDays(0);
     var weekday = dayNames[today.getDay()];
     var weekString = today.toString("yyyy'W'ww");
-
+    var currywurst = false;
+    
     $(document).ready(function(){
         $( "#headline").text(weekday);
         $.getJSON( "mahlzeit.json", function( data ) {
@@ -36,6 +40,9 @@
             }
 
             $.each( data[weekString][weekday], function( key, val ) {
+                if ( val.indexOf("Currywurst") > 0 ) {
+                    $(".mz-currywurst").show();
+                }
                 p.clone().text(val).appendTo("#today");
             });
         }).fail(function(){
