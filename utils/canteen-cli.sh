@@ -2,7 +2,7 @@
 API_URL="https://users.suse.com/~cwh/mahlzeit/mahlzeit.json"
 
 if [ $# -eq 0 ]; then # No arguments supplied
-    MENU_OFFSET=1
+    [[ $(date +%k) -ge 13 ]] && MENU_OFFSET=0 || MENU_OFFSET=1
 else
     case "$1" in
     "tomorrow") MENU_OFFSET=0 ;;
