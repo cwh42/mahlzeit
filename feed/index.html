@@ -21,21 +21,35 @@
   <script src="assets/xdate.min.js"></script>
   <script src="assets/jquery-3.6.3.min.js"></script>
   <script type="text/javascript">
-    const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag'];
-    var today = new XDate().addDays(0);
-    var weekday = dayNames[today.getDay()];
-    var weekString = today.toString("yyyy'W'ww");
+    class MenuPlan {
+      static #dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag'];
+      today = new XDate().addDays(0);
+      weekDay = MenuPlan.#dayNames[this.today.getDay()];
+      weekString = this.today.toString("yyyy'W'ww");
+      #data;
+
+      constructor(data) {
+        this.#data = data;
+      }
+
+      getToday() {
+        return Object.values(this.#data[this.weekString][this.weekDay]);
+      }
+    }
 
     $(document).ready(function(){
-        $( "#headline").text(weekday);
         $.getJSON( "mahlzeit.json", function( data ) {
+            const menu = new MenuPlan(data);
             var p = $( "#today .mz-dish" );
+            var today = menu.getToday();
 
-            if ( typeof data[weekString][weekday] !== 'undefined' ) {
+            $( "#headline").text(menu.weekDay);
+
+            if ( today.length > 0 ) {
                 p.remove();
             }
 
-            $.each( data[weekString][weekday], function( key, val ) {
+            today.forEach( function( val ) {
                 p.clone().text(val).appendTo("#today");
             });
         }).fail(function(){
