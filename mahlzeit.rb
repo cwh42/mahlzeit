@@ -17,10 +17,6 @@ OptionParser.new do |parser|
   parser.on("-d", "--debug", "Debug output") do |d|
     options[:debug] = d
   end
-
-  parser.on("-r", "--rss", "Output as RSS") do |r|
-    options[:rss] = r
-  end
 end.parse!
 
 filenames = ARGV.select {|param| param.downcase.include?('.pdf') }
@@ -91,8 +87,5 @@ filenames.each do |filename|
   end
 end
 
-if options[:rss]
-  write_rss output
-else
-  puts JSON.pretty_generate(output)
-end
+# Print json sorted by keys
+puts JSON.pretty_generate(Hash[*output.sort.flatten])

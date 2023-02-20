@@ -1,7 +1,5 @@
 # Helpers for Mahlzeit!
 
-require 'rss_creator'
-
 # let #p write to STDERR
 def p(*args)
   return *args.each do |arg|
@@ -38,23 +36,4 @@ def parse (line, regexp)
   else
     []
   end
-end
-
-# write RSS feed xml and metadata
-def write_rss (data)
-  rss = RSScreator.new 'mahlzeit.rss'
-  rss.title = 'Mahlzeit!'
-  rss.desc = 'Nuremberg Franken Campus\' Canteen Menu Feed'
-
-  data.each do |date, week|
-    week.each do |day, menu|
-      desc = ''
-      menu.each do |cat, dish|
-        desc << "<i>#{cat}</i>: #{dish}</br>"
-      end
-      item = { title: "#{date}, #{day}", link: '–', description: desc }
-      rss.add item
-    end
-  end
-  rss.save
 end
