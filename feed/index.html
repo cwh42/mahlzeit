@@ -22,39 +22,53 @@
   <script src="assets/jquery-3.6.3.min.js"></script>
   <script type="text/javascript">
     class MenuPlan {
-      static #dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag'];
-      today = new XDate().addDays(0);
-      weekDay = MenuPlan.#dayNames[this.today.getDay()];
-      weekString = this.today.toString("yyyy'W'ww");
+      static #dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+      date = new XDate();
       #data;
 
       constructor(data) {
         this.#data = data;
       }
 
-      getToday() {
-        return Object.values(this.#data[this.weekString][this.weekDay]);
+      getMenu() {
+        return Object.values(this.#data[this.weekString()][this.weekDay()]);
       }
+
+      weekDay() {
+        return MenuPlan.#dayNames[this.date.getDay()];
+      }
+      
+      weekString() {
+        return this.date.toString("yyyy'W'ww");
+      }
+
+      [Symbol.iterator]() {
+        return { next: () => ( { value: this.getMenu(), done: (this.date.addDays(1).getDay() > 5) }) };
+      };
     }
 
     $(document).ready(function(){
-        $.getJSON( "mahlzeit.json", function( data ) {
-            const menu = new MenuPlan(data);
-            var p = $( "#today .mz-dish" );
-            var today = menu.getToday();
+      $.getJSON( "mahlzeit.json", function( data ) {
+        const menu = new MenuPlan(data);
+        var p = $( "#today .mz-dish" );
+        var today = menu.getMenu();
 
-            $( "#headline").text(menu.weekDay);
+        $( "#headline").text(menu.weekDay());
 
-            if ( today.length > 0 ) {
-                p.remove();
-            }
+        if ( today.length > 0 ) {
+            p.remove();
+        }
 
-            today.forEach( function( val ) {
-                p.clone().text(val).appendTo("#today");
-            });
-        }).fail(function(){
-            $( "#headline").text("Oops! Could not load the menu!");
+        today.forEach( function( val ) {
+            p.clone().text(val).appendTo("#today");
         });
+
+        for (const value of menu) {
+          console.log(value);
+        }
+      }).fail(function(){
+        $( "#headline").text("Oops! Could not load the menu!");
+      });
     });
   </script>
   </body>
