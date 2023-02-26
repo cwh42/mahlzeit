@@ -9,6 +9,11 @@ def p(*args)
   end
 end
 
+def past?(week)
+  # parsing a week date results in its Monday; add 6 days to get its Sunday
+  Date.parse(week) + 6 < Date.today
+end
+
 # check if string contains any of the words from the @ignore-list
 def ignore?(string)
   @ignore.any? { |word| string.include?(word) }

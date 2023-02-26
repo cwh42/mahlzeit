@@ -12,6 +12,7 @@ require './lib/helpers'
 @debug = false
 
 json_file = nil
+cleanup = false
 
 OptionParser.new do |parser|
   parser.banner = "Usage: #{$PROGRAM_NAME} [-d]"
@@ -22,6 +23,10 @@ OptionParser.new do |parser|
 
   parser.on('-u', '--update FILE', 'Update <FILE>') do |f|
     json_file = f
+  end
+
+  parser.on('-c', '--cleanup', 'Filter past weeks') do |c|
+    cleanup = c
   end
 end.parse!
 
@@ -57,6 +62,9 @@ filenames.each do |filename|
     end
   end
 end
+
+# Delete past weeks, if desired
+output.delete_if { |w| past? w } if cleanup
 
 # Print json sorted by keys
 json_output = JSON.pretty_generate(Hash[*output.sort.flatten])
