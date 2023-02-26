@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 require 'pdf/reader'
 require 'date'
@@ -13,21 +14,21 @@ require './lib/helpers'
 json_file = nil
 
 OptionParser.new do |parser|
-  parser.banner = "Usage: #{$0} [-d]"
+  parser.banner = "Usage: #{$PROGRAM_NAME} [-d]"
 
   parser.on('-d', '--debug', 'Debug output') do |d|
     @debug = d
   end
-  
+
   parser.on('-u', '--update FILE', 'Update <FILE>') do |f|
     json_file = f
   end
 end.parse!
 
-filenames = ARGV.select {|param| param.downcase.include?('.pdf') }
+filenames = ARGV.select { |param| param.downcase.include?('.pdf') }
 
 if filenames.empty?
-  puts 'Give one or more PDF-files to parse as a parameter!'
+  warn 'Give one or more PDF-files to parse as a parameter!'
   exit
 end
 
@@ -39,10 +40,10 @@ output = {}
 if json_file
   begin
     File.open json_file do |f|
-      output = JSON.load f
+      output = JSON.parse f.read
     end
-  rescue
-    puts "File '#{json_file}' not found. Will create new one."
+  rescue Errno::ENOENT
+    warn "File '#{json_file}' not found. Will create it."
   end
 end
 
@@ -52,7 +53,7 @@ filenames.each do |filename|
       date, week = parse page.text
       # add the week to the output as a hash with ISO 8601 week date, like "2022W40", as a key
       output[date.strftime('%GW%V')] = week
-      STDERR.puts '-- new week --' + '-' * 60 if @debug
+      warn "-- new week --#{'-' * 60}" if @debug
     end
   end
 end
@@ -64,6 +65,6 @@ if json_file
   File.open json_file, 'w' do |f|
     f.write json_output
   end
-elsif
+else
   puts json_output
 end
