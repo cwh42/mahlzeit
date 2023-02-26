@@ -14,13 +14,13 @@ GEM
     ttfunk (1.7.0)
 
 PLATFORMS
-  x86_64-linux
+  ruby
 
 DEPENDENCIES
   pdf-reader (~> 2.11)
 
 RUBY VERSION
-   ruby 3.1.1p18
+   ruby 2.5.9p229
 
 BUNDLED WITH
-   2.3.26
+   1.16.1

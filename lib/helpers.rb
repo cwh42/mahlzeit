@@ -29,11 +29,61 @@ def line_regexp (line)
 end
 
 # parse a line of the table body using the given regexp
-def parse (line, regexp)
+def parse_line(line, regexp)
   line += ' ' * 6 # add one space per col for safer pattern matching
   if m = line.match(regexp)
     m.captures.map { |cols| cols.strip }
   else
     []
   end
+end
+
+def parse(page)
+  week = {}
+  cols = []
+  regexp = nil
+  category = ''
+  date = nil
+  header_length = 0
+  page.split(/\n+/).each do |line|
+    p line if @debug
+    
+    # ignore lines containing words form the @ignore list
+    next if ignore? line
+    # line contains a date formatted like '31.12.2022'; use it as a hash-key later
+    next if date.nil? && line.match(/\d+\.\d+\.\d{4}/) {|matchdata| date = Date.parse(matchdata[0]) }
+    
+    if regexp.nil?
+      if line.start_with?(@headers.first)
+        header_length = line.length
+        regexp = line_regexp line
+        p regexp if @debug
+      end
+      next
+    end
+    
+    columns = parse_line line, regexp # parse the line; get an array
+    p columns if @debug
+    
+    columns.each_index do |i|
+      wday = @headers[i]
+      snip = columns[i]
+      next if snip.empty?
+      
+      if i == 0 # first column contains the category of the dish
+        category = snip
+      elsif category != 'Salat' # Ignore any salad (too healthy)
+        if week[wday].nil? # new day for that week?
+          week[wday] = {category => snip}
+        else
+          if week[wday][category].nil? # new category for that day?
+            week[wday][category] = snip
+          else # day and category are already there; just append the current snippet
+            week[wday][category] += " #{snip}"
+          end
+        end
+      end
+    end
+  end
+  [date, week]
 end
