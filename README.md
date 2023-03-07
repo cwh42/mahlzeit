@@ -7,8 +7,19 @@ Make a PDF parser command line tool that brings the Nuremberg Canteen's Menu to 
 
 ## Usage:
 
-You don't need to parse the PDFs on your own. We do that for you! Find cli tools in `./utils`, if you prefer subscribing to a RSS feed choose the [Internal](http://w3.suse.de/~cwh/mahlzeit/mahlzeit.rss) or the [External](https://users.suse.com/~cwh/mahlzeit/mahlzeit.rss) one.
+You don't need to parse the PDFs on your own. We do that for you!
 
+### Web Version
+
+- [Internal](http://w3.suse.de/~cwh/mahlzeit/)
+- [External](https://users.suse.com/~cwh/mahlzeit/)
+
+Fully JS-based. No backend needed. Loads `mahlzeit.json` and picks the right menu of the day.
+
+### CLI tools
+Find cli tools in `./utils`.
+
+## Development
 If you want to create your own tool you find `mahlzeit.json` on [w3.suse.de](http://w3.suse.de/~cwh/mahlzeit/mahlzeit.json) or [users.suse.com](https://users.suse.com/~cwh/mahlzeit/mahlzeit.json)
 
 
