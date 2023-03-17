@@ -1,47 +1,101 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Mahlzeit!</title>
-    <link href="assets/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD">
+    <link
+      href="assets/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"
+    />
   </head>
   <body>
+    <main>
+      <div class="px-4 py-5 my-5 text-center">
+        <div class="d-block mx-auto mb-4">
+          <img
+            src="assets/1F35D.svg"
+            height="130em;"
+            title="designed by OpenMoji – the open-source emoji and icon project. License: CC BY-SA 4.0"
+          />
+        </div>
+        <h1 id="headline" class="display-5 fw-bold">Mahlzeit!</h1>
 
-  <main>
-  <div class="px-4 py-5 my-5 text-center">
-    <div class="d-block mx-auto mb-4"><img src="assets/1F35D.svg" height="130em;" title="designed by OpenMoji – the open-source emoji and icon project. License: CC BY-SA 4.0"></div>
-    <h1 id="headline" class="display-5 fw-bold">Mahlzeit!</h1>
-    <div id="today" class="col-lg-6 mx-auto">
-      <p class="lead mb-4 mz-dish">😭</p>
-    </div>
-  </div>
-  </main>
-  <script src="assets/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"></script>
-  <script src="assets/xdate.min.js"></script>
-  <script src="assets/jquery-3.6.3.min.js"></script>
-  <script type="text/javascript">
-    const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag'];
-    var today = new XDate().addDays(0);
-    var weekday = dayNames[today.getDay()];
-    var weekString = today.toString("yyyy'W'ww");
+        <div class="d-flex justify-content-center my-3">
+          <button id="prev-day" class="btn btn-outline-primary mx-2">
+            &lt;
+          </button>
+          <button id="next-day" class="btn btn-outline-primary mx-2">
+            &gt;
+          </button>
+        </div>
 
-    $(document).ready(function(){
-        $( "#headline").text(weekday);
-        $.getJSON( "mahlzeit.json", function( data ) {
-            var p = $( "#today .mz-dish" );
+        <div id="today" class="col-lg-6 mx-auto">
+          <p class="lead mb-4 mz-dish">😭</p>
+        </div>
+      </div>
+    </main>
+    <script
+      src="assets/bootstrap.bundle.min.js"
+      integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+    ></script>
+    <script src="assets/xdate.min.js"></script>
+    <script src="assets/jquery-3.6.3.min.js"></script>
+    <script type="text/javascript">
+      const dayNames = [
+        "Sonntag",
+        "Montag",
+        "Dienstag",
+        "Mittwoch",
+        "Donnerstag",
+        "Freitag",
+      ];
 
-            if ( typeof data[weekString][weekday] !== 'undefined' ) {
-                p.remove();
-            }
+      var today = new XDate().addDays(0);
+      var currentDayIndex = today.getDay();
 
-            $.each( data[weekString][weekday], function( key, val ) {
-                p.clone().text(val).appendTo("#today");
+      $("#prev-day").click(function () {
+        currentDayIndex =
+          (currentDayIndex - 1 + dayNames.length) % dayNames.length;
+        updateMenu();
+      });
+
+      $("#next-day").click(function () {
+        currentDayIndex = (currentDayIndex + 1) % dayNames.length;
+        updateMenu();
+      });
+
+      $(document).ready(function () {
+        updateMenu();
+      });
+
+      function updateMenu() {
+        $("#today").empty();
+
+        var currentDay = dayNames[currentDayIndex];
+        var currentWeek = new XDate().addDays(currentDayIndex - today.getDay());
+        var currentWeekString = currentWeek.toString("yyyy'W'ww");
+
+        $("#headline").text(
+          currentDay + ", " + currentWeek.toString("dd.MM.yyyy")
+        );
+        $.getJSON("mahlzeit.json", function (data) {
+          var p = $('<p class="lead mb-4 mz-dish"></p>');
+          if (
+            typeof data[currentWeekString] === "undefined" ||
+            typeof data[currentWeekString][currentDay] === "undefined"
+          ) {
+            p.text("😭 | No menu available for this day.").appendTo("#today");
+          } else {
+            $.each(data[currentWeekString][currentDay], function (key, val) {
+              p.clone().text(val).appendTo("#today");
             });
-        }).fail(function(){
-            $( "#headline").text("Oops! Could not load the menu!");
+          }
+        }).fail(function () {
+          $("#headline").text("Oops! Could not load the menu!");
         });
-    });
-  </script>
+      }
+    </script>
   </body>
 </html>
