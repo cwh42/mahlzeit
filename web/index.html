@@ -23,6 +23,7 @@
   <script type="text/javascript">
     const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag'];
     var today = new XDate().addDays(0);
+    if (today.getHours() >= 13) { today.addDays(1) };
     var weekday = dayNames[today.getDay()];
     var weekString = today.toString("yyyy'W'ww");
 
