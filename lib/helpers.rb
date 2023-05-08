@@ -59,7 +59,7 @@ def parse(page)
     next if date.nil? && line.match(/\d+\.\d+\.\d{4}/) { |matchdata| date = Date.parse(matchdata[0]) }
 
     if regexp.nil?
-      if line.start_with?(@headers.first)
+      if line.match(header_regexp)
         regexp = line_regexp line
         p regexp if @debug
       end
