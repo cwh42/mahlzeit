@@ -7,7 +7,7 @@ require 'json'
 require 'optparse'
 require './lib/helpers'
 
-@headers = %w[Angebot|\s Montag Dienstag Mittwoch Donnerstag Freitag]
+@headers = %w[.* Montag Dienstag Mittwoch Donnerstag Freitag]
 @ignore = %w[enthält 'Stellen Sie sich' 'und Toppings zusammen' Beilagentausch Informationen Änderungen]
 @debug = false
 

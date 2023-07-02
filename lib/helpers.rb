@@ -21,18 +21,26 @@ end
 
 # create a regexp to match the table headers
 def header_regexp
-  pattern = @headers.map { |header| "(?<#{header}>#{header}\\s*)" }.join
-  Regexp.new pattern
+  col_patterns = @headers.map { |header| "(#{header}\\s*)" }
+  header_pattern = ['^', *col_patterns].join
+  p header_pattern if @debug
+  Regexp.new header_pattern
 end
 
 # create a regexp to split up the lines by fixed-width columns
 def line_regexp(line)
   col_widths = line.match(@header_regexp).captures.map(&:length)
+  ruler(col_widths) if @debug
   col_widths.pop # remove last column
   pattern = col_widths.map { |col| "(.{,#{col}}\\s|.{#{col}})" }.join
   #                                       ^ increase col to increase tolerance for wider columns
   # col+0 means cols can be at most 1 char wider than the header suggests
   Regexp.new "#{pattern}(.*)" # add a catch-all instead of the last column
+end
+
+def ruler(col_widths)
+  line = col_widths.map { |col| ' ' * (col-1) }.join('|')
+  p line if @debug
 end
 
 # parse a line of the table body using the given regexp
