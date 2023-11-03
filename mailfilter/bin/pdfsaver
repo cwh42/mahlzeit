@@ -1,10 +1,10 @@
 #!/bin/bash
 
 shopt -s nocaseglob
-TMPDIR=`mktemp -d`
+DIR=`mktemp -d`
 
-$HOME/bin/ripmime -i - -d $TMPDIR
+$HOME/bin/ripmime -i - -d $DIR
 
-mv $TMPDIR/*.pdf $HOME/Export/mahlzeit/
+$HOME/bin/mahlzeit $DIR/*.pdf
 
-rm -r $TMPDIR
+rm -r $DIR
