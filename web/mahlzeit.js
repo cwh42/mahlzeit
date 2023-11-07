@@ -14,56 +14,25 @@ if ("serviceWorker" in navigator) {
   }
 }
 
-const dayNames = [
-  "Sonntag",
-  "Montag",
-  "Dienstag",
-  "Mittwoch",
-  "Donnerstag",
-  "Freitag",
-];
-
+const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag'];
 var today = new XDate().addDays(0);
-var currentDayIndex = today.getDay();
+if (today.getHours() >= 13) { today.addDays(1) };
+var weekday = dayNames[today.getDay()];
+var weekString = today.toString("yyyy'W'ww");
 
-$("#prev-day").click(function () {
-  currentDayIndex =
-  (currentDayIndex - 1 + dayNames.length) % dayNames.length;
-  updateMenu();
-});
+$(document).ready(function(){
+  $( "#headline").text(weekday);
+  $.getJSON( "mahlzeit.json", function( data ) {
+    var p = $( "#today .mz-dish" );
 
-$("#next-day").click(function () {
-  currentDayIndex = (currentDayIndex + 1) % dayNames.length;
-  updateMenu();
-});
-
-$(document).ready(function () {
-  updateMenu();
-});
-
-function updateMenu() {
-  $("#today").empty();
-
-  var currentDay = dayNames[currentDayIndex];
-  var currentWeek = new XDate().addDays(currentDayIndex - today.getDay());
-  var currentWeekString = currentWeek.toString("yyyy'W'ww");
-
-  $("#headline").text(
-    currentDay + ", " + currentWeek.toString("dd.MM.yyyy")
-  );
-  $.getJSON("mahlzeit.json", function (data) {
-    var p = $('<p class="lead mb-4 mz-dish"></p>');
-    if (
-      typeof data[currentWeekString] === "undefined" ||
-      typeof data[currentWeekString][currentDay] === "undefined"
-    ) {
-      p.text("😭 | No menu available for this day.").appendTo("#today");
-    } else {
-      $.each(data[currentWeekString][currentDay], function (key, val) {
-        p.clone().text(val).appendTo("#today");
-      });
+    if ( typeof data[weekString][weekday] !== 'undefined' ) {
+      p.remove();
     }
-  }).fail(function () {
-    $("#headline").text("Oops! Could not load the menu!");
+
+    $.each( data[weekString][weekday], function( key, val ) {
+      p.clone().text(val).appendTo("#today");
+    });
+  }).fail(function(){
+    $( "#headline").text("Oops! Could not load the menu!");
   });
-}
+});
