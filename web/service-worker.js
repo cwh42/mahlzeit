@@ -1,13 +1,14 @@
 var CACHE = 'mahlzeit-v1';
 
-// On install, cache some resource.
-self.addEventListener('install', function(evt) {
+const addResourcesToCache = async (resources) => {
+  const cache = await caches.open(CACHE);
+  await cache.addAll(resources);
+};
+
+self.addEventListener("install", (event) => {
   console.log('The service worker is being installed.');
-  // Open a cache and use `addAll()` with an array of assets to add all of them
-  // to the cache. Ask the service worker to keep installing until the
-  // returning promise resolves.
-  evt.waitUntil(caches.open(CACHE).then(function (cache) {
-    cache.addAll([
+  event.waitUntil(
+    addResourcesToCache([
       '/',
       'index.html',
       'mahlzeit.js',
@@ -16,65 +17,41 @@ self.addEventListener('install', function(evt) {
       'assets/bootstrap.bundle.min.js',
       'assets/jquery-3.6.3.min.js',
       'assets/xdate.min.js'
-    ]);
-  }));
-});
-
-// On fetch, use cache but update the entry with the latest contents
-// from the server.
-self.addEventListener('fetch', function(evt) {
-  console.log('The service worker is serving the asset.');
-  // You can use `respondWith()` to answer ASAP...
-  evt.respondWith(fromCache(evt.request));
-  // ...and `waitUntil()` to prevent the worker to be killed until
-  // the cache is updated.
-  evt.waitUntil(
-    update(evt.request)
-    // Finally, send a message to the client to inform it about the
-    // resource is up to date.
-    //.then(refresh)
+    ]),
   );
 });
 
-// Open the cache where the assets were stored and search for the requested
-// resource. Notice that in case of no matching, the promise still resolves
-// but it does with `undefined` as value.
-function fromCache(request) {
-  return caches.open(CACHE).then(function (cache) {
-    return cache.match(request);
-  });
-}
+const putInCache = async (request, response) => {
+  const cache = await caches.open(CACHE);
+  await cache.put(request, response);
+};
 
+const cacheFirst = async (request) => {
+  // First try to get the resource from the cache
+  const responseFromCache = await caches.match(request);
+  if (responseFromCache) {
+    return responseFromCache;
+  }
 
-// Update consists in opening the cache, performing a network request and
-// storing the new response data.
-function update(request) {
-  return caches.open(CACHE).then(function (cache) {
-    return fetch(request).then(function (response) {
-      return cache.put(request, response.clone()).then(function () {
-        return response;
-      });
+  // Next try to get the resource from the network
+  try {
+    const responseFromNetwork = await fetch(request);
+    // response may be used only once
+    // we need to save clone to put one copy in cache
+    // and serve second one
+    putInCache(request, responseFromNetwork.clone());
+    return responseFromNetwork;
+  } catch (error) {
+    return new Response("Network error happened", {
+      status: 408,
+      headers: { "Content-Type": "text/plain" },
     });
-  });
-}
+  }
+};
 
-// Sends a message to the clients.
-function refresh(response) {
-  return self.clients.matchAll().then(function (clients) {
-    clients.forEach(function (client) {
-      // Encode which resource has been updated. By including the
-      // [ETag](https://en.wikipedia.org/wiki/HTTP_ETag) the client can
-      // check if the content has changed.
-      var message = {
-        type: 'refresh',
-        url: response.url,
-        // Notice not all servers return the ETag header. If this is not
-        // provided you should use other cache headers or rely on your own
-        // means to check if the content has changed.
-        eTag: response.headers.get('ETag')
-      };
-      // Tell the client about the update.
-      client.postMessage(JSON.stringify(message));
-    });
-  });
-}
+self.addEventListener("fetch", (event) => {
+  console.log('The service worker is serving the asset.');
+  event.respondWith(
+    cacheFirst(event.request)
+  );
+});
