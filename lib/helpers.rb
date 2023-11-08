@@ -1,6 +1,14 @@
 # frozen_string_literal: true
 
 # Helpers for Mahlzeit!
+LINTER_FIXES = { 'schmorrt' => 'schmort',
+                 'wurrst' => 'wurst',
+                 /([Kk])lasisch/ => '\1lassisch',
+                 'lions' => 'loins', # https://en.wikipedia.org/wiki/Loin#Loins_in_butchery
+                 /- +(?=[a-z])/ => '', # fix hyphenation
+                 /(?<=-) +(?=[A-Z])/ => '', # remove spaces from compounds
+                 /(?<=\d) +(?=€)/ => "\u{00A0}", # make the space in the price tag non-breaking
+                 /(?<=\s)[Il|](?=\s)/ => '·' }.freeze # just make it use one kind of separator: the Interpunct
 
 # let #p write to STDERR
 def p(*args)
@@ -39,7 +47,7 @@ def line_regexp(line)
 end
 
 def ruler(col_widths)
-  line = col_widths.map { |col| ' ' * (col-1) }.join('|')
+  line = col_widths.map { |col| ' ' * (col - 1) }.join('|')
   p line if @debug
 end
 
@@ -96,4 +104,16 @@ def parse(page)
     end
   end
   [date, week]
+end
+
+# Fix style, typos etc.
+def lint(menu)
+  menu.each_value do |day|
+    day.transform_values! do |dish|
+      LINTER_FIXES.each_pair do |pattern, replacement|
+        dish.gsub!(pattern, replacement)
+      end
+      dish
+    end
+  end
 end
