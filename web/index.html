@@ -4,45 +4,32 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Mahlzeit!</title>
-    <link href="assets/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD">
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" type="image/svg" href="assets/1F35D.svg" />
+    <link rel="apple-touch-icon" href="assets/1F35D.svg" />
+    <link
+      href="assets/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"
+    />
   </head>
   <body>
-
-  <main>
-  <div class="px-4 py-5 my-5 text-center">
-    <div class="d-block mx-auto mb-4"><img src="assets/1F35D.svg" height="130em;" title="designed by OpenMoji – the open-source emoji and icon project. License: CC BY-SA 4.0"></div>
-    <h1 id="headline" class="display-5 fw-bold">Mahlzeit!</h1>
-    <div id="today" class="col-lg-6 mx-auto">
-      <p class="lead mb-4 mz-dish">😭</p>
-    </div>
-  </div>
-  </main>
-  <script src="assets/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"></script>
-  <script src="assets/xdate.min.js"></script>
-  <script src="assets/jquery-3.6.3.min.js"></script>
-  <script type="text/javascript">
-    const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag'];
-    var today = new XDate().addDays(0);
-    if (today.getHours() >= 13) { today.addDays(1) };
-    var weekday = dayNames[today.getDay()];
-    var weekString = today.toString("yyyy'W'ww");
-
-    $(document).ready(function(){
-        $( "#headline").text(weekday);
-        $.getJSON( "mahlzeit.json", function( data ) {
-            var p = $( "#today .mz-dish" );
-
-            if ( typeof data[weekString][weekday] !== 'undefined' ) {
-                p.remove();
-            }
-
-            $.each( data[weekString][weekday], function( key, val ) {
-                p.clone().text(val).appendTo("#today");
-            });
-        }).fail(function(){
-            $( "#headline").text("Oops! Could not load the menu!");
-        });
-    });
-  </script>
+    <main>
+      <div class="px-4 py-5 my-5 text-center">
+        <div class="d-block mx-auto mb-4"><img src="assets/1F35D.svg" height="130em;" title="designed by OpenMoji – the open-source emoji and icon project. License: CC BY-SA 4.0"></div>
+        <h1 id="headline" class="display-5 fw-bold">Mahlzeit!</h1>
+        <div id="today" class="col-lg-6 mx-auto">
+          <p class="lead mb-4 mz-dish">😭</p>
+        </div>
+      </div>
+    </main>
+    <script
+      src="assets/bootstrap.bundle.min.js"
+      integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
+    >
+    </script>
+    <script src="assets/xdate.min.js"></script>
+    <script src="assets/jquery-3.6.3.min.js"></script>
+    <script src="mahlzeit.js"></script>
   </body>
 </html>
