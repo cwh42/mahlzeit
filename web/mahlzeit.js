@@ -17,22 +17,31 @@ if ("serviceWorker" in navigator) {
 const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag'];
 var today = new XDate().addDays(0);
 if (today.getHours() >= 13) { today.addDays(1) };
-var weekday = dayNames[today.getDay()];
-var weekString = today.toString("yyyy'W'ww");
 
-$(document).ready(function(){
-  $( "#headline").text(weekday);
+$(document).ready(function() {
+  renderDay(today)
+});
+
+function renderDay(date) {
+  var weekday = dayNames[date.getDay()];
+  var weekString = date.toString("yyyy'W'ww");
+
+  ci = $( "#mzCarousel carousel-item active" ).clone;
+
+  $(".mz-day").text(weekday);
   $.getJSON( "mahlzeit.json", function( data ) {
-    var p = $( "#today .mz-dish" );
+    var p = $( ".mz-menu .mz-dish" );
 
     if ( typeof data[weekString][weekday] !== 'undefined' ) {
       p.remove();
     }
 
     $.each( data[weekString][weekday], function( key, val ) {
-      p.clone().text(val).appendTo("#today");
+      p.clone().text(val).appendTo(".mz-menu");
     });
   }).fail(function(){
-    $( "#headline").text("Oops! Could not load the menu!");
+    $( ".mz-day").text("Oops! Could not load the menu!");
   });
-});
+
+  ci.appendTo("#mzCarousel carousel-inner")
+}

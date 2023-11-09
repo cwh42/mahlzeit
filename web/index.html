@@ -12,17 +12,44 @@
       rel="stylesheet"
       integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD"
     />
+     <link href="assets/mahlzeit.css" rel="stylesheet">
   </head>
-  <body>
-    <main>
-      <div class="px-4 py-5 my-5 text-center">
-        <div class="d-block mx-auto mb-4"><img src="assets/1F35D.svg" height="130em;" title="designed by OpenMoji – the open-source emoji and icon project. License: CC BY-SA 4.0"></div>
-        <h1 id="headline" class="display-5 fw-bold">Mahlzeit!</h1>
-        <div id="today" class="col-lg-6 mx-auto">
-          <p class="lead mb-4 mz-dish">😭</p>
+  <body data-bs-theme="auto">
+    <header>
+      <div class="my-5 text-center">
+        <div class="d-block mx-auto mb-4">
+          <img src="assets/1F35D.svg" height="130em;" title="designed by OpenMoji – the open-source emoji and icon project. License: CC BY-SA 4.0">
         </div>
       </div>
+    </header>
+    <main>
+      <div id="mzCarousel" class="carousel slide mb-6" data-bs-ride="carousel">
+        <div class="carousel-inner">
+          <div class="carousel-item active">
+            <svg class="bd-placeholder-img" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid slice" focusable="false"><rect width="100%" height="100%" fill="var(--bs-secondary-color)"/></svg>
+            <div class="carousel-caption">
+              <h1 class="display-5 fw-bold mz-day">Mahlzeit!</h1>
+              <div class="col-lg-6 mx-auto mz-menu">
+                <p class="lead mb-4 mz-dish">😭</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#myCarousel" data-bs-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#myCarousel" data-bs-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
     </main>
+    <footer>
+      <div class="my-5 text-center">
+        <p>Mahlzeit on GitHub</p>
+      </div>
+    </footer>
     <script
       src="assets/bootstrap.bundle.min.js"
       integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN"
