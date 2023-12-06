@@ -16,13 +16,12 @@ body {
 }
 /* Since positioning the image, we need to help out the caption */
 .carousel-caption {
-  bottom: 3rem;
-  z-index: 10;
+  /* color: var(--fbc-primary-text); */
 }
 
 /* Declare heights because of positioning of img element */
 .carousel-item {
-  height: 30rem;
+  height: 26rem;
 }
 
 /* RESPONSIVE CSS

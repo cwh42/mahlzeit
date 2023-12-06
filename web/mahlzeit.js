@@ -14,34 +14,46 @@ if ("serviceWorker" in navigator) {
   }
 }
 
-const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag'];
-var today = new XDate().addDays(0);
+const mzCarouselElement = document.querySelector('#mzCarousel')
+const carousel = new bootstrap.Carousel(mzCarouselElement, {
+  touch: true
+});
+
+const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
+var today = new XDate();
 if (today.getHours() >= 13) { today.addDays(1) };
 
 $(document).ready(function() {
-  renderDay(today)
+  if (today.getDay() == 0 || today.getDay() == 6) { today.setWeek(today.getWeek() + 1) };
+  var template = $("#mzCarousel .carousel-item.active").detach();
+
+  var ci = renderDay(today, template.clone());
+  ci.appendTo("#mzCarousel .carousel-inner");
+
+  while (today.getDay() < 5) {
+    ci = renderDay(today.addDays(1), template.clone()).removeClass("active");
+    ci.appendTo("#mzCarousel .carousel-inner");
+  }
 });
 
-function renderDay(date) {
+function renderDay(date, template) {
   var weekday = dayNames[date.getDay()];
   var weekString = date.toString("yyyy'W'ww");
 
-  ci = $( "#mzCarousel carousel-item active" ).clone;
-
-  $(".mz-day").text(weekday);
+  template.find(".mz-day").text(weekday);
   $.getJSON( "mahlzeit.json", function( data ) {
-    var p = $( ".mz-menu .mz-dish" );
+    var p = template.find( ".mz-menu .mz-dish" ).clone();
 
-    if ( typeof data[weekString][weekday] !== 'undefined' ) {
-      p.remove();
-    }
+    if ( typeof data[weekString] === 'undefined' || typeof data[weekString][weekday] === 'undefined' ) { return template; }
+
+    template.find(".mz-menu").empty();
 
     $.each( data[weekString][weekday], function( key, val ) {
-      p.clone().text(val).appendTo(".mz-menu");
+      p.clone().text(val).appendTo(template.find(".mz-menu"));
     });
   }).fail(function(){
-    $( ".mz-day").text("Oops! Could not load the menu!");
+    template.find(".mz-day").text("Oops! Could not load the menu!");
   });
 
-  ci.appendTo("#mzCarousel carousel-inner")
+  return template;
 }
