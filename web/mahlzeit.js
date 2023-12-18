@@ -36,11 +36,17 @@ $(document).ready(function() {
   }
 });
 
+function tagPrice(elem) {
+  const regex = /\b([0-9,]+&nbsp;€)/u;
+  return elem.html(elem.html().replace(regex, "<span class='price'>$&</span>"));
+}
+
 function renderDay(date, template) {
   var weekday = dayNames[date.getDay()];
   var weekString = date.toString("yyyy'W'ww");
 
   template.find(".mz-day").text(weekday);
+  template.find(".mz-date").text(date.toLocaleDateString());
   $.getJSON( "mahlzeit.json", function( data ) {
     var p = template.find( ".mz-menu .mz-dish" ).clone();
 
@@ -49,7 +55,8 @@ function renderDay(date, template) {
     template.find(".mz-menu").empty();
 
     $.each( data[weekString][weekday], function( key, val ) {
-      p.clone().text(val).appendTo(template.find(".mz-menu"));
+      item = tagPrice(p.clone().text(val))
+      item.appendTo(template.find(".mz-menu"));
     });
   }).fail(function(){
     template.find(".mz-day").text("Oops! Could not load the menu!");

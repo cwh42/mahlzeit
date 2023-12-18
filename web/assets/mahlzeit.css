@@ -1,36 +1,41 @@
-/* GLOBAL STYLES
--------------------------------------------------- */
-/* Padding below the footer and lighter body text */
+html {
+  position: relative;
+  min-height: 100%;
+}
 
 body {
   color: rgb(var(--bs-tertiary-color-rgb));
 }
 
-
-/* CUSTOMIZE THE CAROUSEL
--------------------------------------------------- */
-
-/* Carousel base class */
-.carousel {
-  margin-bottom: 4rem;
-}
-/* Since positioning the image, we need to help out the caption */
-.carousel-caption {
-  /* color: var(--fbc-primary-text); */
+.price {
+  font-style: italic;
 }
 
-/* Declare heights because of positioning of img element */
-.carousel-item {
-  height: 26rem;
+.price:before {
+  content: "\a";
+  white-space: pre;
 }
 
-/* RESPONSIVE CSS
--------------------------------------------------- */
+/* black version of the control icons */
+.carousel-control-prev-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='M11.354 1.646a.5.5 0 0 1 0 .708L5.707 8l5.647 5.646a.5.5 0 0 1-.708.708l-6-6a.5.5 0 0 1 0-.708l6-6a.5.5 0 0 1 .708 0z'/%3e%3c/svg%3e");
+}
+
+.carousel-control-next-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23000'%3e%3cpath d='M4.646 1.646a.5.5 0 0 1 .708 0l6 6a.5.5 0 0 1 0 .708l-6 6a.5.5 0 0 1-.708-.708L10.293 8 4.646 2.354a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 60px; /* Set the fixed height of the footer here */
+  line-height: 60px; /* Vertically center the text there */
+}
 
 @media (min-width: 40em) {
   /* Bump up size of carousel content */
-  .carousel-caption p {
-    margin-bottom: 1.25rem;
+  .mz-menu p {
     font-size: 1.25rem;
     line-height: 1.4;
   }
