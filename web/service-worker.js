@@ -1,4 +1,4 @@
-var CACHE = 'mahlzeit-v1';
+var CACHE = 'mahlzeit-v1.1';
 
 const addResourcesToCache = async (resources) => {
   const cache = await caches.open(CACHE);
@@ -12,7 +12,6 @@ self.addEventListener("install", (event) => {
       '/',
       'index.html',
       'mahlzeit.js',
-      'mahlzeit.json',
       'assets/1F35D.svg',
       'assets/bootstrap.bundle.min.js',
       'assets/jquery-3.6.3.min.js',
@@ -48,6 +47,21 @@ const cacheFirst = async (request) => {
     });
   }
 };
+
+const deleteCache = async (key) => {
+  await caches.delete(key);
+};
+
+const deleteOldCaches = async () => {
+  const cacheKeepList = [CACHE];
+  const keyList = await caches.keys();
+  const cachesToDelete = keyList.filter((key) => !cacheKeepList.includes(key));
+  await Promise.all(cachesToDelete.map(deleteCache));
+};
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(deleteOldCaches());
+});
 
 self.addEventListener("fetch", (event) => {
   console.log('The service worker is serving the asset.');
