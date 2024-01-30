@@ -13,21 +13,14 @@ require './lib/helpers'
 
 json_file = nil
 cleanup = false
+lint = false
 
 OptionParser.new do |parser|
   parser.banner = "Usage: #{$PROGRAM_NAME} [-d]"
-
-  parser.on('-d', '--debug', 'Debug output') do |d|
-    @debug = d
-  end
-
-  parser.on('-u', '--update FILE', 'Update <FILE>') do |f|
-    json_file = f
-  end
-
-  parser.on('-c', '--cleanup', 'Filter past weeks') do |c|
-    cleanup = c
-  end
+  parser.on('-d', '--debug', 'Debug output') { |d| @debug = d }
+  parser.on('-u', '--update FILE', 'Update <FILE>') { |f| json_file = f }
+  parser.on('-c', '--cleanup', 'Filter past weeks') { |c| cleanup = c }
+  parser.on('-l', '--lint', 'Fix some common typos and style issues') { |l| lint = l }
 end.parse!
 
 filenames = ARGV.select { |param| param.downcase.include?('.pdf') }
@@ -55,9 +48,10 @@ end
 filenames.each do |filename|
   PDF::Reader.open(filename) do |reader|
     reader.pages.each do |page|
-      date, week = parse page.text
+      date, menu = parse page.text
+      menu = lint(menu) if lint
       # add the week to the output as a hash with ISO 8601 week date, like "2022W40", as a key
-      output[date.strftime('%GW%V')] = week
+      output[date.strftime('%GW%V')] = menu
       warn "-- new week --#{'-' * 60}" if @debug
     end
   end
