@@ -20,7 +20,7 @@ Fully JS-based. No backend needed. Loads `mahlzeit.json` and picks the right men
 Find cli tools in `./utils`.
 
 ## Development
-If you want to create your own tool you find `mahlzeit.json` on [w3.suse.de](http://w3.suse.de/~cwh/mahlzeit/mahlzeit.json) or [users.suse.com](https://users.suse.com/~cwh/mahlzeit/mahlzeit.json)
+If you want to create your own tool you find `mahlzeit.json` on [w3.suse.de](http://w3.suse.de/~cwh/mahlzeit/mahlzeit.json) or [mahlzeit.webeve.de](https://mahlzeit.webeve.de/mahlzeit.json)
 
 
 ## Parsing:
