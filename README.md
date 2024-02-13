@@ -12,7 +12,7 @@ You don't need to parse the PDFs on your own. We do that for you!
 ### Web Version
 
 - [Internal](http://w3.suse.de/~cwh/mahlzeit/)
-- [External](https://users.suse.com/~cwh/mahlzeit/)
+- New [External](https://mahlzeit.webeve.de/)
 
 Fully JS-based. No backend needed. Loads `mahlzeit.json` and picks the right menu of the day.
 
