@@ -1,4 +1,4 @@
-var CACHE = 'mahlzeit-v1.1';
+var CACHE = 'mahlzeit-v1.2';
 
 const addResourcesToCache = async (resources) => {
   const cache = await caches.open(CACHE);
@@ -25,14 +25,7 @@ const putInCache = async (request, response) => {
   await cache.put(request, response);
 };
 
-const cacheFirst = async (request) => {
-  // First try to get the resource from the cache
-  const responseFromCache = await caches.match(request);
-  if (responseFromCache) {
-    return responseFromCache;
-  }
-
-  // Next try to get the resource from the network
+const networkFetch = async (request) => {
   try {
     const responseFromNetwork = await fetch(request);
     // response may be used only once
@@ -46,6 +39,17 @@ const cacheFirst = async (request) => {
       headers: { "Content-Type": "text/plain" },
     });
   }
+};
+
+const cacheFirst = async (request) => {
+  // First try to get the resource from the cache
+  const responseFromCache = await caches.match(request);
+  if (responseFromCache) {
+    return responseFromCache;
+  }
+
+  // Next try to get the resource from the network
+  return networkFetch(request);
 };
 
 const deleteCache = async (key) => {
@@ -65,7 +69,11 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   console.log('The service worker is serving the asset.');
-  event.respondWith(
-    cacheFirst(event.request)
-  );
+  response = cacheFirst(event.request);
+  url = new URL(event.request.url);
+
+  if ( url.pathname.endsWith('mahlzeit.json') ) {
+    response = networkFetch(request);
+  }
+  event.respondWith(response);
 });
