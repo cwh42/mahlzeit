@@ -70,7 +70,11 @@ def parse(page)
     p line if @debug
 
     # ignore lines containing words form the @ignore list
-    next if ignore? line
+    if ignore?(line)
+      p ' -> ignored' if @debug
+      next
+    end
+
     # line contains a date formatted like '31.12.2022'; use it as a hash-key later
     next if date.nil? && line.match(/\d+\.\d+\.\d{4}/) { |matchdata| date = Date.parse(matchdata[0]) }
 

@@ -8,7 +8,7 @@ require 'optparse'
 require './lib/helpers'
 
 @headers = %w[.* Montag Dienstag Mittwoch Donnerstag Freitag]
-@ignore = %w[enthält 'Stellen Sie sich' 'und Toppings zusammen' Beilagentausch Informationen Änderungen]
+@ignore = %w[Beilagentausch Zusatzstoffe Allergene Änderungen]
 @debug = false
 
 json_file = nil
