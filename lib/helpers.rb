@@ -8,7 +8,8 @@ LINTER_FIXES = { 'schmorrt' => 'schmort',
                  /- +(?=[a-z])/ => '', # fix hyphenation
                  /(?<=-) +(?=[A-Z])/ => '', # remove spaces from compounds
                  /(?<=\d) +(?=€)/ => "\u{00A0}", # make the space in the price tag non-breaking
-                 /(?<=\s)[Il|](?=\s)/ => '·' }.freeze # just make it use one kind of separator: the Interpunct
+                 /(?<=\s)[Il|](?=\s)/ => '·', # just make it use one kind of separator: the Interpunct
+                 /·\s*·/ => '·' }.freeze
 
 # let #p write to STDERR
 def p(*args)
@@ -25,6 +26,10 @@ end
 # check if string contains any of the words from the @ignore-list
 def ignore?(string)
   @ignore.any? { |word| string.include?(word) }
+end
+
+def ignore_category?(category)
+  @ignore_category.any? { |re| re.match?(category) }
 end
 
 # create a regexp to match the table headers
@@ -95,12 +100,12 @@ def parse(page)
 
     columns.each_index do |i|
       wday = @headers[i]
-      snip = columns[i]
+      snip = columns[i].squeeze(' ')
       next if snip.empty?
 
       if i.zero? # first column contains the category of the dish
         category = snip
-      elsif category != 'Salat' # Ignore any salad (too healthy)
+      elsif !ignore_category?(category)
         if week[wday].nil? # new day for that week?
           week[wday] = { category => snip }
         elsif week[wday][category].nil?

@@ -8,7 +8,8 @@ require 'optparse'
 require './lib/helpers'
 
 @headers = %w[.* Montag Dienstag Mittwoch Donnerstag Freitag]
-@ignore = %w[Beilagentausch Zusatzstoffe Allergene Änderungen]
+@ignore = %w[enthält Stellen\ Sie\ sich und\ Toppings\ zusammen Beilagentausch Zusatzstoffe Allergene Änderungen]
+@ignore_category = [/salat/i, /^[A-Z][0-9]*$/] # in case allergens slipping in the first column
 @debug = false
 
 json_file = nil
@@ -31,7 +32,12 @@ if filenames.empty?
 end
 
 @header_regexp = header_regexp
-p @header_regexp if @debug
+
+if @debug
+  p '@header_regexp:', @header_regexp
+  p '@ignore:', @ignore
+  p '@ignore_category:', @ignore_category
+end
 
 output = {}
 
