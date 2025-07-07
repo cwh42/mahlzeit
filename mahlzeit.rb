@@ -8,7 +8,8 @@ require 'optparse'
 require './lib/helpers'
 
 @headers = %w[.* Montag Dienstag Mittwoch Donnerstag Freitag]
-@ignore = %w[Beilagentausch Zusatzstoffe Allergene Änderungen]
+@ignore = %w[enthält Stellen\ Sie\ sich und\ Toppings\ zusammen Beilagentausch Zusatzstoffe Allergene Änderungen]
+@ignore_category = [/salat/i, /^[A-Z][0-9]*$/] # in case allergens slipping in the first column
 @debug = false
 
 json_file = nil
@@ -31,7 +32,12 @@ if filenames.empty?
 end
 
 @header_regexp = header_regexp
-p @header_regexp if @debug
+
+if @debug
+  p '@header_regexp:', @header_regexp
+  p '@ignore:', @ignore
+  p '@ignore_category:', @ignore_category
+end
 
 output = {}
 
@@ -53,6 +59,8 @@ filenames.each do |filename|
       # add the week to the output as a hash with ISO 8601 week date, like "2022W40", as a key
       output[date.strftime('%GW%V')] = menu
       warn "-- new week --#{'-' * 60}" if @debug
+    rescue RuntimeError => e
+      warn "Skip #{filename} due to #{e.message}"
     end
   end
 end
