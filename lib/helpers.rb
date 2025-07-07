@@ -76,7 +76,11 @@ def parse(page)
     end
 
     # line contains a date formatted like '31.12.2022'; use it as a hash-key later
-    next if date.nil? && line.match(/\d+\.\d+\.\d{4}/) { |matchdata| date = Date.parse(matchdata[0]) }
+    next if date.nil? && line.match(/\d+\.\d+\.\d{4}/) do |matchdata|
+      date = Date.parse(matchdata[0])
+    rescue Date::Error => e
+      raise "Parse error: #{e.message}"
+    end
 
     if regexp.nil?
       if line.match(header_regexp)

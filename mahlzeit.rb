@@ -53,6 +53,8 @@ filenames.each do |filename|
       # add the week to the output as a hash with ISO 8601 week date, like "2022W40", as a key
       output[date.strftime('%GW%V')] = menu
       warn "-- new week --#{'-' * 60}" if @debug
+    rescue RuntimeError => e
+      warn "Skip #{filename} due to #{e.message}"
     end
   end
 end
