@@ -15,6 +15,7 @@ require './lib/helpers'
 json_file = nil
 cleanup = false
 lint = false
+v2 = false
 
 OptionParser.new do |parser|
   parser.banner = "Usage: #{$PROGRAM_NAME} [-d]"
@@ -22,6 +23,7 @@ OptionParser.new do |parser|
   parser.on('-u', '--update FILE', 'Update <FILE>') { |f| json_file = f }
   parser.on('-c', '--cleanup', 'Filter past weeks') { |c| cleanup = c }
   parser.on('-l', '--lint', 'Fix some common typos and style issues') { |l| lint = l }
+  parser.on('-2', '--v2', 'Use new file format') { |v| v2 = v }
 end.parse!
 
 filenames = ARGV.select { |param| param.downcase.include?('.pdf') }
@@ -40,6 +42,7 @@ if @debug
 end
 
 output = {}
+out_arr = []
 
 if json_file
   begin
@@ -58,6 +61,7 @@ filenames.each do |filename|
       menu = lint(menu) if lint
       # add the week to the output as a hash with ISO 8601 week date, like "2022W40", as a key
       output[date.strftime('%GW%V')] = menu
+      out_arr.concat(v2ify(date, menu)) if v2
       warn "-- new week --#{'-' * 60}" if @debug
     rescue RuntimeError => e
       warn "Skip #{filename} due to #{e.message}"
@@ -69,7 +73,7 @@ end
 output.delete_if { |w| past? w } if cleanup
 
 # Print json sorted by keys
-json_output = JSON.pretty_generate(Hash[*output.sort.flatten])
+json_output = JSON.pretty_generate( v2 ? out_arr.sort { |a, b| a[:date] <=> b[:date] }.uniq : Hash[*output.sort.flatten])
 
 if json_file
   File.open json_file, 'w' do |f|
