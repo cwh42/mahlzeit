@@ -1,17 +1,19 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    Ascii85 (1.1.0)
+    Ascii85 (2.0.1)
     afm (0.2.2)
+    bigdecimal (3.2.2)
     hashery (2.1.2)
-    pdf-reader (2.11.0)
-      Ascii85 (~> 1.0)
+    pdf-reader (2.14.1)
+      Ascii85 (>= 1.0, < 3.0, != 2.0.0)
       afm (~> 0.2.1)
       hashery (~> 2.0)
       ruby-rc4
       ttfunk
     ruby-rc4 (0.1.5)
-    ttfunk (1.7.0)
+    ttfunk (1.8.0)
+      bigdecimal (~> 3.1)
 
 PLATFORMS
   x86_64-linux
@@ -21,7 +23,7 @@ DEPENDENCIES
   pdf-reader (~> 2.11)
 
 RUBY VERSION
-   ruby 2.5.9p229
+   ruby 3.3.8p144
 
 BUNDLED WITH
-   2.3.23
+   2.6.8

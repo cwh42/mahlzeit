@@ -2,6 +2,6 @@
 
 source 'https://rubygems.org'
 
-ruby '~> 2.5'
+ruby '~> 3.3'
 gem 'bundler', '~> 2.3'
 gem 'pdf-reader', '~> 2.11'
