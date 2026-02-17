@@ -4,6 +4,7 @@ GEM
     Ascii85 (2.0.1)
     afm (1.0.0)
     bigdecimal (3.3.1)
+    diff-lcs (1.6.2)
     hashery (2.1.2)
     pdf-reader (2.15.1)
       Ascii85 (>= 1.0, < 3.0, != 2.0.0)
@@ -11,6 +12,19 @@ GEM
       hashery (~> 2.0)
       ruby-rc4
       ttfunk
+    rspec (3.13.2)
+      rspec-core (~> 3.13.0)
+      rspec-expectations (~> 3.13.0)
+      rspec-mocks (~> 3.13.0)
+    rspec-core (3.13.6)
+      rspec-support (~> 3.13.0)
+    rspec-expectations (3.13.5)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.13.0)
+    rspec-mocks (3.13.7)
+      diff-lcs (>= 1.2.0, < 2.0)
+      rspec-support (~> 3.13.0)
+    rspec-support (3.13.7)
     ruby-rc4 (0.1.5)
     ttfunk (1.8.0)
       bigdecimal (~> 3.1)
@@ -21,6 +35,7 @@ PLATFORMS
 DEPENDENCIES
   bundler (~> 2.3)
   pdf-reader (~> 2.11)
+  rspec (~> 3.13)
 
 RUBY VERSION
    ruby 3.4.5p51
