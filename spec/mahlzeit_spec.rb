@@ -38,6 +38,15 @@ RSpec.describe "mahlzeit.rb" do
       it 'has all of its values be Hashes' do
         expect(menu.values).to all(be_a(Hash))
       end
+
+      context 'the returned daily menu' do
+        subject(:daily_menu) { menu.values.first }
+
+        it 'has all of its keys and values be Strings' do
+          expect(daily_menu.keys).to all(be_a(String))
+          expect(daily_menu.values).to all(be_a(String))
+        end
+      end
     end
   end
 end
