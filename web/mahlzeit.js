@@ -1,4 +1,6 @@
-if ("serviceWorker" in navigator) {
+const enableServiceWorker = false;
+
+if (enableServiceWorker && "serviceWorker" in navigator) {
   try {
     const registration = navigator.serviceWorker.register("service-worker.js");
 
@@ -20,20 +22,24 @@ const carousel = new bootstrap.Carousel(mzCarouselElement, {
 });
 
 const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
-var today = new XDate();
-if (today.getHours() >= 13) { today.addDays(1) };
+
+var active_count = 0;
+var now = new XDate();
+var today = XDate.today();
+if (now.getHours() >= 13) { today.addDays(1) };
 
 $(document).ready(function() {
-  if (today.getDay() == 0 || today.getDay() == 6) { today.setWeek(today.getWeek() + 1) };
-  var template = $("#mzCarousel .carousel-item.active").detach();
+  var template = $("#mzCarousel .carousel-item.active").detach().removeClass("active");
 
-  var ci = renderDay(today, template.clone());
-  ci.appendTo("#mzCarousel .carousel-inner");
-
-  while (today.getDay() < 5) {
-    ci = renderDay(today.addDays(1), template.clone()).removeClass("active");
-    ci.appendTo("#mzCarousel .carousel-inner");
-  }
+  $.getJSON( "./mahlzeit_v2.json", function( data ) {
+    $.each( data, function( i, day ) {
+      ci = renderDay(day, template.clone());
+      ci.appendTo("#mzCarousel .carousel-inner");
+    });
+  }).fail(function(){
+    template.addClass("active");
+    template.find(".mz-day").text("Oops! Could not load the menu!");
+  });
 });
 
 function tagPrice(elem) {
@@ -41,25 +47,31 @@ function tagPrice(elem) {
   return elem.html(elem.html().replace(regex, "<span class='price'>$&</span>"));
 }
 
-function renderDay(date, template) {
+function renderDay(day, template) {
+  var date = day['date'];
+  var menu = day['menu'];
+
+  if ( typeof date === 'undefined' ) { return template; }
+
+  date = new XDate(date);
   var weekday = dayNames[date.getDay()];
-  var weekString = date.toString("yyyy'W'ww");
 
   template.find(".mz-day").text(weekday);
   template.find(".mz-date").text(date.toLocaleDateString());
-  $.getJSON( "mahlzeit.json", function( data ) {
-    var p = template.find( ".mz-menu .mz-dish" ).clone();
 
-    if ( typeof data[weekString] === 'undefined' || typeof data[weekString][weekday] === 'undefined' ) { return template; }
+  if ( active_count == 0 && date >= today ) {
+    template.addClass("active");
+    active_count++;
+  }
 
-    template.find(".mz-menu").empty();
+  if ( typeof menu === 'undefined' ) { return template; }
 
-    $.each( data[weekString][weekday], function( key, val ) {
-      item = tagPrice(p.clone().text(val))
-      item.appendTo(template.find(".mz-menu"));
-    });
-  }).fail(function(){
-    template.find(".mz-day").text("Oops! Could not load the menu!");
+  var p = template.find( ".mz-menu .mz-dish" ).clone();
+  template.find(".mz-menu").empty();
+
+  $.each( menu, function( i, dish ) {
+    item = tagPrice(p.clone().text(dish));
+    item.appendTo(template.find(".mz-menu"));
   });
 
   return template;

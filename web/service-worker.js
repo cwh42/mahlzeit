@@ -1,4 +1,4 @@
-var CACHE = 'mahlzeit-v1.2';
+var CACHE = 'mahlzeit-v1.999';
 
 const addResourcesToCache = async (resources) => {
   const cache = await caches.open(CACHE);
@@ -72,7 +72,7 @@ self.addEventListener("fetch", (event) => {
   response = cacheFirst(event.request);
   url = new URL(event.request.url);
 
-  if ( url.pathname.endsWith('mahlzeit.json') ) {
+  if ( url.pathname.endsWith('mahlzeit_v2.json') ) {
     response = networkFetch(request);
   }
   event.respondWith(response);
