@@ -15,6 +15,7 @@ require './lib/helpers'
 json_file = nil
 cleanup = false
 lint = false
+v2 = false
 
 OptionParser.new do |parser|
   parser.banner = "Usage: #{$PROGRAM_NAME} [-d]"
@@ -22,6 +23,7 @@ OptionParser.new do |parser|
   parser.on('-u', '--update FILE', 'Update <FILE>') { |f| json_file = f }
   parser.on('-c', '--cleanup', 'Filter past weeks') { |c| cleanup = c }
   parser.on('-l', '--lint', 'Fix some common typos and style issues') { |l| lint = l }
+  parser.on('-2', '--v2', 'Use new file format') { |v| v2 = v }
 end.parse!
 
 filenames = ARGV.select { |param| param.downcase.include?('.pdf') }
@@ -40,14 +42,28 @@ if @debug
 end
 
 output = {}
+out_arr = []
 
 if json_file
   begin
     File.open json_file do |f|
-      output = JSON.parse f.read
+      data = JSON.parse f.read #, { symbolize_names: true }
+
+      warn "#{json_file} contains an #{data.class}" if @debug
+
+      case data.class.to_s
+      when "Hash"  # v1
+        output = data
+        out_arr.concat(*data.map { |date, menu| v2ify(Date.parse(date), menu) })
+      when "Array" # v2
+        out_arr = data.map { |d| d.transform_keys(&:to_sym)}
+      else
+        warn "JSON file seems not to be the right format."
+        exit
+      end
     end
   rescue Errno::ENOENT
-    warn "File '#{json_file}' not found. Will create it."
+    warn "File '#{json_file}' not found -> creating …"
   end
 end
 
@@ -58,6 +74,7 @@ filenames.each do |filename|
       menu = lint(menu) if lint
       # add the week to the output as a hash with ISO 8601 week date, like "2022W40", as a key
       output[date.strftime('%GW%V')] = menu
+      out_arr.concat(v2ify(date, menu)) if v2
       warn "-- new week --#{'-' * 60}" if @debug
     rescue RuntimeError => e
       warn "Skip #{filename} due to #{e.message}"
@@ -65,11 +82,14 @@ filenames.each do |filename|
   end
 end
 
-# Delete past weeks, if desired
-output.delete_if { |w| past? w } if cleanup
+# Delete past data, if desired
+if cleanup
+  output.delete_if { |w| past? w }
+  out_arr.delete_if { |d| Date.parse(d[:date]) < Date.today }
+end
 
 # Print json sorted by keys
-json_output = JSON.pretty_generate(Hash[*output.sort.flatten])
+json_output = JSON.pretty_generate( v2 ? out_arr.sort { |a, b| a[:date] <=> b[:date] }.uniq { |d| d[:date] } : Hash[*output.sort.flatten])
 
 if json_file
   File.open json_file, 'w' do |f|

@@ -130,3 +130,9 @@ def lint(menu)
     end
   end
 end
+
+def v2ify(date, menu)
+  menu.to_a.map do |(day, menu)|
+      { date: "#{date + @headers.index(day) - 1}", menu: menu.values }
+  end
+end
