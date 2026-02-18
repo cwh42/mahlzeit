@@ -47,10 +47,23 @@ out_arr = []
 if json_file
   begin
     File.open json_file do |f|
-      output = JSON.parse f.read
+      data = JSON.parse f.read #, { symbolize_names: true }
+
+      warn "#{json_file} contains an #{data.class}" if @debug
+
+      case data.class.to_s
+      when "Hash"  # v1
+        output = data
+        out_arr.concat(*data.map { |date, menu| v2ify(Date.parse(date), menu) })
+      when "Array" # v2
+        out_arr = data.map { |d| d.transform_keys(&:to_sym)}
+      else
+        warn "JSON file seems not to be the right format."
+        exit
+      end
     end
   rescue Errno::ENOENT
-    warn "File '#{json_file}' not found. Will create it."
+    warn "File '#{json_file}' not found -> creating …"
   end
 end
 
@@ -69,11 +82,14 @@ filenames.each do |filename|
   end
 end
 
-# Delete past weeks, if desired
-output.delete_if { |w| past? w } if cleanup
+# Delete past data, if desired
+if cleanup
+  output.delete_if { |w| past? w }
+  out_arr.delete_if { |d| Date.parse(d[:date]) < Date.today }
+end
 
 # Print json sorted by keys
-json_output = JSON.pretty_generate( v2 ? out_arr.sort { |a, b| a[:date] <=> b[:date] }.uniq : Hash[*output.sort.flatten])
+json_output = JSON.pretty_generate( v2 ? out_arr.sort { |a, b| a[:date] <=> b[:date] }.uniq { |d| d[:date] } : Hash[*output.sort.flatten])
 
 if json_file
   File.open json_file, 'w' do |f|
