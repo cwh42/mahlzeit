@@ -1,6 +1,11 @@
 # Web Version
 
-- [Internal](http://w3.suse.de/~cwh/mahlzeit/)
-- [External](https://users.suse.com/~cwh/mahlzeit/)
+- [https://mahlzeit.webeve.de/](https://mahlzeit.webeve.de/)
 
-Full JS-based. No backend needed. Loads `mahlzeit.json` and picks the right menu of the day.
+Full JS-based. No backend needed. Loads `mahlzeit_v2.json` and picks the right menu of the day.
+
+## Changes in v2:
+
+- Shows all available menus, not just for the current week.
+- New JSON format.
+- Use system setting for dark/light-mode

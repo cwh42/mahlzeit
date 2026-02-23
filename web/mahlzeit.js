@@ -35,16 +35,16 @@ $(document).ready(function() {
       ci = renderDay(day, template.clone());
       ci.appendTo("#mzCarousel .carousel-inner");
     });
+
+    // add the crying smiley if there is no active item after rendering the whole JSON
+    if (!$("#mzCarousel .carousel-item").hasClass("active")) {
+      template.clone().addClass("active").appendTo("#mzCarousel .carousel-inner").find(".mz-day").text("Sorry, no data.");
+    }
   }).fail(function(){
     template.addClass("active");
     template.find(".mz-day").text("Oops! Could not load the menu!");
     template.appendTo("#mzCarousel .carousel-inner");
   });
-
-  // add the crying smiley if there is no active item after rendering the whole JSON
-  if (!$("#mzCarousel .carousel-item").hasClass("active")) {
-    template.clone().addClass("active").appendTo("#mzCarousel .carousel-inner").find(".mz-day").text("Sorry, no data.");
-  }
 });
 
 function tagPrice(elem) {
