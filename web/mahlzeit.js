@@ -23,7 +23,6 @@ const carousel = new bootstrap.Carousel(mzCarouselElement, {
 
 const dayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 
-var active_count = 0;
 var now = new XDate();
 var today = XDate.today();
 if (now.getHours() >= 13) { today.addDays(1) };
@@ -39,7 +38,13 @@ $(document).ready(function() {
   }).fail(function(){
     template.addClass("active");
     template.find(".mz-day").text("Oops! Could not load the menu!");
+    template.appendTo("#mzCarousel .carousel-inner");
   });
+
+  // add the crying smiley if there is no active item after rendering the whole JSON
+  if (!$("#mzCarousel .carousel-item").hasClass("active")) {
+    template.clone().addClass("active").appendTo("#mzCarousel .carousel-inner").find(".mz-day").text("Sorry, no data.");
+  }
 });
 
 function tagPrice(elem) {
@@ -59,9 +64,8 @@ function renderDay(day, template) {
   template.find(".mz-day").text(weekday);
   template.find(".mz-date").text(date.toLocaleDateString());
 
-  if ( active_count == 0 && date >= today ) {
+  if ( !($("#mzCarousel .carousel-item").hasClass("active")) && date >= today ) {
     template.addClass("active");
-    active_count++;
   }
 
   if ( typeof menu === 'undefined' ) { return template; }
