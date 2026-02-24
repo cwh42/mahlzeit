@@ -1,4 +1,4 @@
-var CACHE = 'mahlzeit-v1.999';
+var CACHE = 'mahlzeit-v2.0';
 
 const addResourcesToCache = async (resources) => {
   const cache = await caches.open(CACHE);
@@ -12,10 +12,12 @@ self.addEventListener("install", (event) => {
       '/',
       'index.html',
       'mahlzeit.js',
+      'assets/mahlzeit.css',
       'assets/1F35D.svg',
       'assets/bootstrap.bundle.min.js',
-      'assets/jquery-3.6.3.min.js',
-      'assets/xdate.min.js'
+      'assets/bootstrap.min.css',
+      'assets/jquery-4.0.0.min.js',
+      'assets/xdate.js'
     ]),
   );
 });
