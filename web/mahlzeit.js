@@ -1,19 +1,39 @@
-const enableServiceWorker = false;
+const enableServiceWorker = true;
 
 if (enableServiceWorker && "serviceWorker" in navigator) {
-  try {
-    const registration = navigator.serviceWorker.register("service-worker.js");
+  let refreshing = false;
 
-    if (registration.installing) {
-      console.log("Service worker installing");
-    } else if (registration.waiting) {
-      console.log("Service worker installed");
-    } else if (registration.active) {
-      console.log("Service worker active");
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if (refreshing) return;
+    refreshing = true;
+    window.location.reload();
+  });
+
+  window.addEventListener("load", async () => {
+    try {
+      const registration = await navigator.serviceWorker.register("service-worker.js", {
+        updateViaCache: "none"
+      });
+      console.log("Service worker registered");
+
+      if (registration.installing) {
+        console.log("Service worker installing");
+      } else if (registration.waiting) {
+        console.log("Service worker waiting");
+      } else if (registration.active) {
+        console.log("Service worker active");
+      }
+
+      registration.addEventListener("updatefound", () => {
+        console.log("Service worker update found");
+      });
+
+      // Check for updated worker on each page load.
+      await registration.update();
+    } catch (error) {
+      console.error("Service worker registration failed", error);
     }
-  } catch (error) {
-    console.error(`Registration failed with ${error}`);
-  }
+  });
 }
 
 const mzCarouselElement = document.querySelector('#mzCarousel')
@@ -29,8 +49,19 @@ if (now.getHours() >= 13) { today.addDays(1) };
 
 $(document).ready(function() {
   var template = $("#mzCarousel .carousel-item.active").detach().removeClass("active");
+  var menuUrl = `./mahlzeit_v2.json?t=${Date.now()}`;
 
-  $.getJSON( "./mahlzeit_v2.json", function( data ) {
+  fetch(menuUrl, {
+    cache: "no-store",
+    headers: { "Cache-Control": "no-cache" }
+  })
+  .then(function(response) {
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    return response.json();
+  })
+  .then(function( data ) {
     $.each( data, function( i, day ) {
       ci = renderDay(day, template.clone());
       ci.appendTo("#mzCarousel .carousel-inner");
@@ -40,7 +71,8 @@ $(document).ready(function() {
     if (!$("#mzCarousel .carousel-item").hasClass("active")) {
       template.clone().addClass("active").appendTo("#mzCarousel .carousel-inner").find(".mz-day").text("Sorry, no data.");
     }
-  }).fail(function(){
+  }).catch(function(error){
+    console.error("Could not load menu JSON", error);
     template.addClass("active");
     template.find(".mz-day").text("Oops! Could not load the menu!");
     template.appendTo("#mzCarousel .carousel-inner");
